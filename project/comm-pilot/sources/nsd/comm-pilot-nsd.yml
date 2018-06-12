@@ -1,43 +1,109 @@
+##
+## Network Service Descriptor (NSD) for the first 
+## iteration of the 5GTango Communications Pilot
+##
+## @author Ana Pol (Quobis), Pol Alemany (CTTC), Felipe Vicens (Atos)
+##
+---
 descriptor_version: "1.0"
-vendor: "quobis"
-name: "communication-pilot"
+vendor: "eu.tango-nfv.service-descriptor"
+name: "5gtango-communication-pilot"
 version: "0.1"
-author: "Ana Pol @: QUOBIS"
-description: "Descriptor to package Communication Pilot"
-##
-## The various network functions this service
-## is composed of.
-##
-network_functions:
-  - vnf_id: "vnf_wac"
-    vnf_vendor: "quobis"
-    vnf_name: "wac-vnf"
-    vnf_version: "0.1"
+author: "Ana Pol (Quobis), Pol Alemany (CTTC), Felipe Vicens (Atos)"
+description: >
+  "This NSD contains the services description composed by a Reverse Proxy, BS and WAC VNFs"
+
 
 ##
-## The NS connection points to the
-## outside world.
+## The various network functions this service is composed of.
+##
+network_functions:
+  - vnf_id: "vnf_rp"
+    vnf_vendor: "quobis"
+    vnf_name: "rp-vnf"
+    vnf_version: "0.1"
+  - vnf_id: "vnf_wac_1"
+    vnf_vendor: "quobis"
+    vnf_name: "wac-1-vnf"
+    vnf_version: "0.1"
+  - vnf_id: "vnf_bs"
+    vnf_vendor: "quobis"
+    vnf_name: "bs-vnf"
+    vnf_version: "0.1"
+  - vnf_id: "vnf_wac_2"
+    vnf_vendor: "quobis"
+    vnf_name: "wac-2-vnf"
+    vnf_version: "0.1"
+
+## TODO: include them when we have the ssm
+## Some service specific managers.
+## image: Specifies the DockerHub URI (user/image name) to fetch the SSM image from.
+##
+#service_specific_managers:
+#  - id: "ssmdumb"
+#    description: "An empty example SSM."
+#    image: "sonatanfv/ssmdumb"
+#    options:
+#      - key: "myKey"
+#        value: "myValue"
+
+##
+## The NS connection points to the outside world.
 ##
 connection_points:
-  - id: "nscpmgmt"
+  - id: "mgmt_net_cp"
     interface: "ipv4"
     type: "management"
-  - id: "nscpexternal"
+  - id: "user_net_cp"
     interface: "ipv4"
     type: "external"
 
 ##
-## The virtual links that interconnect
-## the different connections points.
+## The virtual links that interconnect the different connections points.
 ##
 virtual_links:
-  - id: "vlmgmt"
+  - id: "mgmt_vl"
+    connectivity_type: "E-LAN"
+    connection_points_reference:
+      - "vnf_rp:mgmt"
+      - "vnf_wac_1:mgmt"
+      - "vnf_bs:mgmt"
+      - "vnf_wac_2:mgmt"
+      - "mgmt_net"
+  - id: "intenal_vl"
     connectivity_type: "E-Line"
     connection_points_reference:
-      - "vnf_wac:cpmgmt"
-      - "nscpmgmt"
-  - id: "vlexternal"
+      - "vnf_rp:internal"
+      - "vnf_wac_1:internal"
+      - "vnf_bs:internal"
+      - "vnf_wac_2:internal"
+  - id: "external_vl"
     connectivity_type: "E-Line"
     connection_points_reference:
-      - "nscpexternal"
-      - "vnf_wac:cpexternal"
+      - "vnf_rp:output"
+      - "external"
+      
+## TODO: no need of them for now
+## The forwarding graphs.
+##
+#forwarding_graphs:
+#  - fg_id: "ns:fg01"
+#    number_of_endpoints: 2
+#    number_of_virtual_links: 3
+#    constituent_vnfs:
+#      - "vnf_rp"
+#      - "vnf_wac_1"
+#      - "vnf_bs"
+#      - "vnf_wac_2"
+#    network_forwarding_paths:
+#      - fp_id: "ns:fg01:fp01"
+#        policy: "none"
+#        connection_points:
+#          - connection_point_ref: "input"
+#            position: 1
+#          - connection_point_ref: "vnf_vtc:input"
+#            position: 2
+#          - connection_point_ref: "vnf_vtc:output"
+#            position: 3
+#          - connection_point_ref: "output"
+#            position: 4
